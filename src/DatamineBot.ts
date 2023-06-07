@@ -10,21 +10,19 @@ import { SlashCommand } from './commands/SlashCommand';
 import { Event } from './events/Event';
 
 export class DatamineBot extends Client {
-  commands: Map<ApplicationCommand['id'], SlashCommand>;
+  commands: Map<ApplicationCommand['id'], SlashCommand> = new Map();
   constructor(opts: ClientOptions) {
     super(opts);
-    this.commands = new Map();
   }
 
   async loadCommands(): Promise<void> {
     const dir = resolve(__dirname, 'commands');
     const files = await readdir(dir);
-    const commandFiles = files.filter(f => f.includes('.cmd'));
-    for (const commandFile of commandFiles) {
+    for (const commandFile of files) {
       const { default: command } = (await import(join(dir, commandFile))) as {
-        default: SlashCommand;
+        default?: SlashCommand;
       };
-      if (this.application) {
+      if (this.application && command) {
         const cmds = await this.application.commands.fetch();
         let cmd = cmds.find(c => c.name === command.data.name);
         if (!cmd) {
@@ -36,19 +34,12 @@ export class DatamineBot extends Client {
     }
   }
 
-  /**
-   * Loads Events
-   *
-   * @return {*}  {Promise<void>}
-   * @memberof Lifeguard
-   */
   async loadEvents(): Promise<void> {
     const dir = resolve(__dirname, 'events');
     const files = await readdir(dir);
-    const eventFiles = files.filter(f => f.includes('.evt'));
-    for (const eventFile of eventFiles) {
+    for (const eventFile of files) {
       const { default: event } = (await import(join(dir, eventFile))) as {
-        default: Event<keyof ClientEvents>;
+        default?: Event<keyof ClientEvents>;
       };
       if (Event.isEvent(event)) {
         if (event.opts?.once) {
@@ -60,8 +51,8 @@ export class DatamineBot extends Client {
             event.func(this, ...args);
           });
         }
+        console.log(`Loaded Event: ${event.name}`);
       }
-      console.log(`Loaded Event: ${event.name}`);
     }
   }
 }
