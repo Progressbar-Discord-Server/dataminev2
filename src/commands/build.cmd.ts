@@ -15,16 +15,18 @@ export default new SlashCommand(
       },
     ],
   },
-  async ($, i) => {
-    await i.deferReply({
+  async ($, interaction) => {
+    await interaction.deferReply({
       ephemeral: true,
     });
-    const buildNumber = i.options.getInteger('buildnumber', true);
+    const buildNumber = interaction.options.getInteger('buildnumber', true);
     const commit = await Commit.findOne({ buildNumber: `${buildNumber}` });
     if (commit) {
-      await sendCommitEphemeral($, commit, i);
+      await sendCommitEphemeral($, commit, interaction);
     } else {
-      await i.editReply(`No Commit(s) Found for Build ${buildNumber}`);
+      await interaction.editReply(
+        `No Commit(s) Found for Build ${buildNumber}`
+      );
     }
   }
 );

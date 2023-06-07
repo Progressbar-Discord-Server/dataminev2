@@ -22,26 +22,26 @@ export default new SlashCommand(
       },
     ],
   },
-  async ($, i) => {
-    await i.deferReply({
+  async ($, interaction) => {
+    await interaction.deferReply({
       ephemeral: true,
     });
-    const channel = i.options.getChannel('channel', true);
-    const role = i.options.getRole('role');
+    const channel = interaction.options.getChannel('channel', true);
+    const role = interaction.options.getRole('role');
     const exists = await Server.exists({
-      _id: i.guildId,
+      _id: interaction.guildId,
     });
     if (exists) {
-      await i.editReply(
+      await interaction.editReply(
         'This server is already subscribed. Use the config command to update settings.'
       );
     } else {
       const server = await Server.create({
-        _id: i.guildId,
+        _id: interaction.guildId,
         channel: channel.id,
         role: role ? role.id : undefined,
       });
-      await i.editReply(
+      await interaction.editReply(
         'This server is now subscribed. Sending latest commit.'
       );
       const [commit] = await getLatestCommit();

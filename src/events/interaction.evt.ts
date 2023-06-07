@@ -1,26 +1,29 @@
 import { GuildMember } from 'discord.js';
 import { Event } from './Event';
 
-export default new Event('interactionCreate', async ($, i) => {
-  if (i.isCommand()) {
-    const cmd = $.commands.get(i.commandId);
+export default new Event('interactionCreate', async ($, interaction) => {
+  if (interaction.isCommand()) {
+    const cmd = $.commands.get(interaction.commandId);
     if (cmd) {
-      if (cmd.opts?.guildOnly && !i.inGuild()) {
-        return await i.reply({
+      if (cmd.opts?.guildOnly && !interaction.inGuild()) {
+        return await interaction.reply({
           ephemeral: true,
           content: 'This is a guild only command',
         });
       }
       if (
         cmd.opts?.modOnly &&
-        !(i.member as GuildMember).permissions.has('MANAGE_WEBHOOKS', true)
+        !(interaction.member as GuildMember).permissions.has(
+          'MANAGE_WEBHOOKS',
+          true
+        )
       ) {
-        return await i.reply({
+        return await interaction.reply({
           ephemeral: true,
           content: 'This is a mod only command',
         });
       }
-      await cmd.func($, i);
+      await cmd.func($, interaction);
     }
   }
 });

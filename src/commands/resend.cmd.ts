@@ -16,21 +16,23 @@ export default new SlashCommand(
       },
     ],
   },
-  async ($, i) => {
-    await i.deferReply({
+  async ($, interaction) => {
+    await interaction.deferReply({
       ephemeral: true,
     });
-    const buildNumber = i.options.getInteger('buildnumber', true);
+    const buildNumber = interaction.options.getInteger('buildnumber', true);
     const commit = await Commit.findOne({ buildNumber: `${buildNumber}` });
-    const server = await Server.findById(i.guildId);
+    const server = await Server.findById(interaction.guildId);
     if (server) {
       if (commit) {
-        await resendCommit($, commit, server, i);
+        await resendCommit($, commit, server, interaction);
       } else {
-        await i.editReply(`No Commit(s) Found for Build ${buildNumber}`);
+        await interaction.editReply(
+          `No Commit(s) Found for Build ${buildNumber}`
+        );
       }
     } else {
-      await i.editReply('This server is not configured');
+      await interaction.editReply('This server is not configured');
     }
   },
   {

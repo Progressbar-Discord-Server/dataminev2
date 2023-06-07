@@ -49,14 +49,14 @@ export default new SlashCommand(
       },
     ],
   },
-  async ($, i) => {
-    await i.deferReply({
+  async ($, interaction) => {
+    await interaction.deferReply({
       ephemeral: true,
     });
-    const sub = i.options.getSubcommand(true);
+    const sub = interaction.options.getSubcommand(true);
     if (sub === 'get') {
       try {
-        const server = await Server.findById(i.guildId);
+        const server = await Server.findById(interaction.guildId);
         if (server) {
           const embed = new MessageEmbed().addFields([
             {
@@ -68,53 +68,53 @@ export default new SlashCommand(
               value: server.role ? `<@&${server.role}>` : 'No Role Set',
             },
           ]);
-          i.editReply({
+          interaction.editReply({
             embeds: [embed],
           });
         } else {
-          i.editReply('No config found');
+          interaction.editReply('No config found');
         }
       } catch (error) {
-        i.editReply(`${error}`);
+        interaction.editReply(`${error}`);
       }
     }
     if (sub === 'remove') {
       try {
-        await Server.deleteOne({ _id: i.guildId });
-        i.editReply("Deleted the current guild's config");
+        await Server.deleteOne({ _id: interaction.guildId });
+        interaction.editReply("Deleted the current guild's config");
       } catch (error) {
-        i.editReply(`${error}`);
+        interaction.editReply(`${error}`);
       }
     }
     if (sub === 'role') {
-      const role = i.options.getRole('role');
+      const role = interaction.options.getRole('role');
       try {
         const server = await Server.findOneAndUpdate(
-          { _id: i.guildId },
+          { _id: interaction.guildId },
           { role: role?.id ?? '' },
           { upsert: true, new: true }
         );
-        i.editReply(
+        interaction.editReply(
           server.role
             ? `<@&${server.role}> has been set to receive notifications of Datamine posts.`
             : 'Role has been unset'
         );
       } catch (error) {
-        i.editReply(`${error}`);
+        interaction.editReply(`${error}`);
       }
     }
     if (sub === 'channel') {
-      const chan = i.options.getChannel('channel', true);
+      const chan = interaction.options.getChannel('channel', true);
       if (chan.type !== 'GUILD_TEXT') {
-        i.editReply('Channel must be a Text Channel');
+        interaction.editReply('Channel must be a Text Channel');
       } else {
         try {
           const server = await Server.findOneAndUpdate(
-            { _id: i.guildId },
+            { _id: interaction.guildId },
             { channel: chan.id },
             { upsert: true, new: true }
           );
-          i.editReply(
+          interaction.editReply(
             `<#${server?.channel}> has been set to receive Datamine posts. Sending most recent one now!`
           );
           const commit = await getLatestCommit();
@@ -122,7 +122,7 @@ export default new SlashCommand(
             await sendCommit($, commit[0], server!, true);
           }
         } catch (error) {
-          i.editReply(`${error}`);
+          interaction.editReply(`${error}`);
         }
       }
     }

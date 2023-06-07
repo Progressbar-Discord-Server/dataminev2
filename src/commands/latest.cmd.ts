@@ -7,11 +7,11 @@ export default new SlashCommand(
     name: 'latest',
     description: 'Get the latest Datamine comment',
   },
-  async ($, i) => {
-    await i.deferReply({
+  async ($, interaction) => {
+    await interaction.deferReply({
       ephemeral: true,
     });
     const [commit] = await getLatestCommit();
-    await sendCommitEphemeral($, commit, i);
+    await sendCommitEphemeral($, commit, interaction);
   }
 );

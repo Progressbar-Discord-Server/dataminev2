@@ -6,8 +6,8 @@ export default new SlashCommand(
     name: 'ping',
     description: 'Pings the bot to see if it is alive.',
   },
-  async ($, i) => {
-    i.reply({
+  async ($, interaction) => {
+    interaction.reply({
       ephemeral: true,
       embeds: [
         new MessageEmbed()
